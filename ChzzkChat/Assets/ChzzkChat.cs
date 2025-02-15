@@ -96,15 +96,6 @@ public class ChzzkChat : MonoBehaviour
     }
 
     [System.Serializable]
-    public class AccessTokenRequest
-    {
-        public string clientId;
-        public string redirectUri;
-        public string state;
-    }
-
-
-    [System.Serializable]
     public class ChannelRequest
     {
         public string grantType;
@@ -116,58 +107,47 @@ public class ChzzkChat : MonoBehaviour
 
     private string baseUrl = "https://openapi.chzzk.naver.com";
 
-
+    [SerializeField] private LocalRedirectListener redirectListener;
     [SerializeField] private string clientId = "f827034c-632c-42cf-9889-9000674573d0";
     [SerializeField] private string clientSecret = "j6ZIhUJkDhdfNy0HaERDEbjhxNrFdirUIbW_B8QcSmE";
     private string contentType = "application/json";
     private string redirectUri = "http://localhost:8080";
     private string sessionURL = "";
+    private string loginURL = "https://chzzk.naver.com/account-interlock";
 
-    [SerializeField] private string authorization = "";
     private string refreshToken = "";
     private string accessToken = "";
     private string tokenType = "";
     private string expiresln = "";
 
     private string code = "";
-    private string state = "";
+    private string state = "state";
 
     private Quobject.SocketIoClientDotNet.Client.Socket socket;
     
-    string sessionKey = null;
-    
-    private string loginUrl = "";
+    private string sessionKey = null;
 
+    private bool connectTriggered = false;
+    
     void Start()
     {
+        string accessURL = loginURL = $"{loginURL}?clientId={clientId}&redirectUri={redirectUri}&state={state}";
+        Application.OpenURL(accessURL);
+    }
+
+    private void Update()
+    {
+        if (connectTriggered || string.IsNullOrEmpty(redirectListener.code))
+        {
+            return;
+        }
+        connectTriggered = true;
+        this.code = redirectListener.code;
         StartCoroutine(GetUserSession());
     }
-
-    IEnumerator GetAccessToken()
-    {
-        yield return new WaitForSeconds(1);
-        loginUrl = $"https://chzzk.naver.com/account-interlock?clientId={clientId}&redirectUri={redirectUri}&state={state}";
-        using (UnityWebRequest request = UnityWebRequest.Get(loginUrl))
-        {
-            request.redirectLimit = 5;
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("Final URL: " + request.GetResponseHeader("Location"));
-                Debug.Log("Final URL: " + request.url);
-                Debug.Log("Response: " + request.downloadHandler.text);
-            }
-            else
-            {
-                Debug.LogError("Error: " + request.error);
-            }
-        }
-    }
-
+    
     IEnumerator GetUserSession()
     {
-        //yield return StartCoroutine(GetAuthorizationCode());
         yield return StartCoroutine(PostAccessToken());
 
         string url = $"{baseUrl}/open/v1/sessions/auth";
@@ -192,6 +172,7 @@ public class ChzzkChat : MonoBehaviour
             }
         }
     }
+    
     IEnumerator PostAccessToken()
     {
         string url = $"{baseUrl}/auth/v1/token";
@@ -201,8 +182,8 @@ public class ChzzkChat : MonoBehaviour
             grantType = "authorization_code",
             clientId = clientId,
             clientSecret = clientSecret,
-            code = authorization,
-            state = "State"
+            code = this.code,
+            state = this.state
         });
 
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
@@ -266,44 +247,6 @@ public class ChzzkChat : MonoBehaviour
             }
         }
     }
-
-
-    IEnumerator GetAuthorizationCode()
-    {
-        string url = $"https://chzzk.naver.com/account-interlock";
-
-        string json = JsonUtility.ToJson(new AccessTokenRequest
-        {
-            clientId = clientId,
-            redirectUri = "http://localhost:8080",
-            state = "zxclDasdfA25"
-        });
-
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
-        {
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-
-            yield return request.SendWebRequest();
-            Debug.Log("response: " + request.downloadHandler.text);
-
-            AuthorizationCodeResult authorizationCodeResult = JsonUtility.FromJson<AuthorizationCodeResult>(request.downloadHandler.text);
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                code = authorizationCodeResult.content.code;
-                state = authorizationCodeResult.content.state;
-                Debug.Log("code: " + code);
-                Debug.Log("state: " + state);
-            }
-            else
-            {
-                Debug.LogError("Error: " + request.error);
-            }
-        }
-    }
-
 
     IEnumerator ConnectSocket()
     {

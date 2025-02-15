@@ -2,20 +2,32 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class LocalRedirectListener : MonoBehaviour
 {
     private HttpListener listener;
     private string redirectUrl = "http://localhost:8080/";
+    private bool isRunning = false;
 
-    async void Start()
+    public UnityAction<string> onRedirected;
+
+    public string code = null;
+    
+    private void Start()
     {
         listener = new HttpListener();
         listener.Prefixes.Add(redirectUrl);
         listener.Start();
         Debug.Log("Listening on: " + redirectUrl);
 
-        await ListenForRedirect();
+        Invoke("StartListen", 1.0f);
+    }
+
+    private void StartListen()
+    {
+        // ÏöîÏ≤≠ ÎπÑÎèôÍ∏∞ Ï≤òÎ¶¨
+        Task.Run(() => ListenForRedirect());
     }
 
     private async Task ListenForRedirect()
@@ -23,26 +35,32 @@ public class LocalRedirectListener : MonoBehaviour
         while (listener.IsListening)
         {
             var context = await listener.GetContextAsync();
+            var request = context.Request;
             string redirectedUrl = context.Request.Url.ToString();
-            Debug.Log($"Redirected URL: {redirectedUrl}");
 
-            // ¿¿¥‰ ¿¸º€ (∫Í∂ÛøÏ¿˙ø° «•Ω√)
-            string responseString = "<html><body><h1>Login Successful!</h1></body></html>";
-            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-            context.Response.ContentLength64 = buffer.Length;
-            var output = context.Response.OutputStream;
-            await output.WriteAsync(buffer, 0, buffer.Length);
-            output.Close();
-
-            listener.Stop(); // ∑Œ±◊¿Œ øœ∑· »ƒ º≠πˆ ¡æ∑·
+            if (request.Url != null)
+            {
+                Debug.Log($"Received Request: {request.Url.AbsoluteUri}");
+                    
+                // URLÏóêÏÑú token Í∞í Ï∂îÏ∂ú
+                var queriedCode = request.QueryString["code"];
+                if (!string.IsNullOrEmpty(queriedCode))
+                {
+                    Debug.Log($"Extracted Code: {queriedCode}");
+                    code = queriedCode;
+                }
+            }
+            listener.Stop();
         }
     }
 
     private void OnApplicationQuit()
     {
+        isRunning = false;
         if (listener != null && listener.IsListening)
         {
             listener.Stop();
+            listener.Close();
         }
     }
 }

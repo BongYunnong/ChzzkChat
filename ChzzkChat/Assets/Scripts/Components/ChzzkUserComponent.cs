@@ -4,6 +4,9 @@ using System.Collections;
 using UnityEngine.Networking;
 
 
+/// <summary>
+/// # 유저 정보 조회
+/// </summary>
 public class ChzzkUserComponent : ChzzkComponentBase
 {
     [Serializable]

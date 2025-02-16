@@ -7,6 +7,9 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+/// <summary>
+/// # 채널 정보 조회
+/// </summary>
 public class ChzzkChannelComponent : ChzzkComponentBase
 {
     [System.Serializable]

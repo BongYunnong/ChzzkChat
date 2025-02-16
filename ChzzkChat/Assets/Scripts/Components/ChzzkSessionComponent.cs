@@ -10,22 +10,33 @@ using Unity.VisualScripting;
 using UnityEngine.Serialization;
 
 
-[Serializable]
-public class CreateSessionResult
-{
-    public int code;
-    public string message;
-    public Content content;
 
-    [Serializable]
-    public class Content
-    {
-        public string url;
-    }
-}
-
+/// <summary>
+/// # 세션 생성(클라이언트)
+/// # 세션 생성(유저)
+/// # 세션 목록 조회(클라이언트)
+/// # 세션 목록 조회(유저)
+/// # 이벤트 구독(채팅)
+/// # 이벤트 구독 취소(채팅)
+/// # 이벤트 구독(후원)
+/// # 이벤트 구독 취소(후원)
+/// </summary>
 public class ChzzkSessionComponent : ChzzkComponentBase
 {
+    [Serializable]
+    public class CreateSessionResult
+    {
+        public int code;
+        public string message;
+        public Content content;
+
+        [Serializable]
+        public class Content
+        {
+            public string url;
+        }
+    }
+    
     private Socket socket;
     
     private string sessionURL = "";

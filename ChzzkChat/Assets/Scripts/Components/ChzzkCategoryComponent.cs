@@ -5,6 +5,9 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+/// <summary>
+/// # 카테고리 검색
+/// </summary>
 public class ChzzkCategoryComponent : ChzzkComponentBase
 {
     [SerializeField] private InputField categoryInputField;

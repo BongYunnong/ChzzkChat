@@ -19,10 +19,10 @@ public class ChzzkLiveComponent : ChzzkComponentBase
     [System.Serializable]
     public class SettingRequest
     {
-        public string defaultLiveTitle = null;
-        public string categoryType = null;
-        public string categoryId = null;
-        public string[] tags = null;
+        public string defaultLiveTitle = null;  // 빈 값 설정 불가
+        public string categoryType = null;  // GAME, SPORTS, ETC
+        public string categoryId = null;    // ""로 전송하면 카테고리 설정 제거
+        public string[] tags = null;        // empty list면 태그 설정 제거. 공백 및 특수문자 비허용
     }
     
     [SerializeField] private Slider querySizeSlider;

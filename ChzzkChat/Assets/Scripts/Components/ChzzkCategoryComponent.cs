@@ -21,7 +21,7 @@ public class ChzzkCategoryComponent : ChzzkComponentBase
     {
         categoryInputField.onValueChanged.AddListener(HandleCategoryChanged);
         querySizeSlider.onValueChanged.AddListener(HandleQuerySizeChanged);
-        
+        querySizeSlider.value = size;
         categoryName = categoryInputField.text;
     }
 

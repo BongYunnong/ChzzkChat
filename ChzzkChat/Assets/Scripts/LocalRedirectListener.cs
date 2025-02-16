@@ -10,22 +10,21 @@ public class LocalRedirectListener : MonoBehaviour
     private string redirectUrl = "http://localhost:8080/";
     private bool isRunning = false;
 
-    public UnityAction<string> onRedirected;
-
     public string code = null;
     
     private void Start()
     {
         listener = new HttpListener();
         listener.Prefixes.Add(redirectUrl);
-        listener.Start();
-        Debug.Log("Listening on: " + redirectUrl);
 
         Invoke("StartListen", 1.0f);
     }
 
-    private void StartListen()
+    public void StartListen()
     {
+        code = null;
+        listener.Start();
+        Debug.Log("Listening on: " + redirectUrl);
         // 요청 비동기 처리
         Task.Run(() => ListenForRedirect());
     }

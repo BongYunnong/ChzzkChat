@@ -24,18 +24,6 @@ public class CreateSessionResult
     }
 }
 
-
-[System.Serializable]
-public class ChannelRequest
-{
-    public string grantType;
-    public string clientId;
-    public string clientSecret;
-    public string code;
-    public string state;
-}
-
-
 public class ChzzkSessionComponent : ChzzkComponentBase
 {
     private Socket socket;
@@ -82,6 +70,10 @@ public class ChzzkSessionComponent : ChzzkComponentBase
             {
                 StartCoroutine(UnsubscribeDonation());
             }
+        }
+        else if (action == "SESSIONLIST")
+        {
+            StartCoroutine(GetClientSessionList());
         }
     }
 
@@ -261,6 +253,27 @@ public class ChzzkSessionComponent : ChzzkComponentBase
             else
             {
                 Debug.LogWarning("[DONATION] UnsubscribeDonation Failed");
+            }
+        }
+    }
+    
+    IEnumerator GetClientSessionList()
+    {
+        string url = $"{ChzzkController.BaseURL}/open/v1/sessions";
+        using (UnityWebRequest request = UnityWebRequest.Get($"{url}"))
+        {
+            request.SetRequestHeader("Authorization", $"{cachedChzzkController.TokenType} {cachedChzzkController.AccessToken}");
+            request.SetRequestHeader("Content-Type", ChzzkController.ContentType);
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("[SessionList] Response: " + request.downloadHandler.text);
+            }
+            else
+            {
+                Debug.LogError("[SessionList] Error: " + request.error);
             }
         }
     }

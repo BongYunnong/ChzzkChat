@@ -87,7 +87,7 @@ public class ChzzkChannelComponent : ChzzkComponentBase
         string url = $"{ChzzkController.BaseURL}/open/v1/channels";
         string queryString = string.Join("&", channelIds.Select(item => $"channelIds={UnityWebRequest.EscapeURL(item)}"));
         string finalUrl = $"{url}?{queryString}";
-        Debug.Log(finalUrl);
+        Debug.Log($"[Channel] Requset URL : {finalUrl}");
         using (UnityWebRequest request = UnityWebRequest.Get($"{finalUrl}"))
         {
             request.SetRequestHeader("Client-Id", cachedChzzkController.ClientId);
